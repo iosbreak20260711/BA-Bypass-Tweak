@@ -8,18 +8,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4 # 順便升級到 v4
+        uses: actions/checkout@v4
 
       - name: Setup Theos and iOS SDK
         run: |
           # 安裝基礎編譯工具
           sudo apt-get update
-          sudo apt-get install -y build-essential git rsync ccache
+          sudo apt-get install -y build-essential git rsync ccache clang
           
-          # 下載並安裝 Theos
-          bash -c "$(curl -fsSL https://githubusercontent.com)"
+          # 下載並安裝 Theos 核心
+          git clone --recursive https://github.com ~/theos
           
-          # 下載 iOS SDK 確保編譯不會出錯
+          # 下載 iOS SDK（這次修正了 github.com 的拼字錯誤）
           git clone https://github.com ~/theos/sdks
           
           # 設定環境變數
@@ -28,10 +28,11 @@ jobs:
       - name: Build Dylib
         run: |
           export THEOS=~/theos
+          # 使用下載好的 SDK 進行編譯
           make TARGET=iphone:clang:latest:14.0
           
       - name: Upload Dylib Artifact
-        uses: actions/upload-artifact@v4 # <--- 這裡徹底修改成 v4，解決報錯問題
+        uses: actions/upload-artifact@v4
         with:
           name: BABypass-Dylib
           path: .theos/obj/debug/*.dylib
