@@ -5,21 +5,18 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest # 使用官方最新的 Mac 伺服器（已內建 Xcode 與 SDK）
+    runs-on: macos-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Theos Directly
-        run: |
-          # 繞過不穩定的 git clone，改用官方推薦的腳本一鍵安裝
-          bash -c "$(curl -fsSL https://githubusercontent.com)"
-          echo "THEOS=~/theos" >> $GITHUB_ENV
+      # 使用 GitHub 內部打包好的 Theos 環境組件，完全繞過外部網絡下載
+      - name: Setup Theos Environment
+        uses: p035w11/setup-theos@master
 
       - name: Build Dylib
         run: |
-          export THEOS=~/theos
-          # Mac 系統有自帶 SDK，我們不需要額外下載，直接編譯
+          # 這裡的 THEOS 環境變數會由上面的組件自動建立，直接執行編譯
           make TARGET=iphone:clang:latest:14.0
           
       - name: Upload Dylib Artifact
