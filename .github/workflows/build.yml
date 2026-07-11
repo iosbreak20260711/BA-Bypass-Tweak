@@ -1,0 +1,27 @@
+name: Build iOS Dylib
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Theos Directly
+        run: |
+          echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+          git clone --recursive https://github.com $HOME/theos
+
+      - name: Build Dylib
+        run: |
+          export THEOS=$HOME/theos
+          make TARGET=iphone:clang:latest:14.0
+          
+      - name: Upload Dylib Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: BABypass-Dylib
+          path: .theos/obj/debug/*.dylib
