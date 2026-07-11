@@ -5,27 +5,21 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest # 使用自帶 Xcode 環境的 Mac 伺服器
+    runs-on: macos-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Install Theos and SDK Directly
+      # 這次我們只抓核心，因為核心裡已經有足夠編譯普通 Tweak 的 SDK 了！
+      - name: Install Theos Directly
         run: |
-          # 1. 建立並設定環境變數
           echo "THEOS=$HOME/theos" >> $GITHUB_ENV
           export THEOS=$HOME/theos
-          
-          # 2. 直接使用官方 Git 複製 Theos 核心（使用最穩定的官方連結）
-          git clone --recursive https://github.com/theos/theos.git $THEOS
-          
-          # 3. 下載 iOS SDK 放到正確的地方
-          git clone https://github.com $THEOS/sdks
+          git clone --recursive https://github.com $THEOS
 
       - name: Build Dylib
         run: |
           export THEOS=$HOME/theos
-          # 執行編譯
           make TARGET=iphone:clang:latest:14.0
           
       - name: Upload Dylib Artifact
